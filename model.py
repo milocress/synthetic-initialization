@@ -10,7 +10,7 @@ default_tokens = {c: x for x, c in enumerate(ascii_lowercase)}
 def tokenize(input_string: str, token_mapping: str = None):
     if token_mapping is None:
         token_mapping = default_tokens
-    return np.array([token_mapping[c] for c in input_string]), len(token_mapping)
+    return np.array([token_mapping[c] for c in reversed(input_string)]), len(token_mapping)
 
 
 def batch_tokens(tokens: NDArray):
@@ -46,7 +46,7 @@ def unembed(embeds):
     alphabet_size = embed_dim - sequence_len - 2
 
     nominal_tokens = embeds[:,:,2:alphabet_size+2].argmax(dim=2)
-    mask = torch.logical_and((embeds[:,:,0] > 2), (embeds[:,:,1] == 2))
+    mask = torch.logical_and((embeds[:,:,0] > 2), (embeds[:,:,1] != 2))
     nominal_tokens[mask] = -1
     return nominal_tokens
 
@@ -54,7 +54,7 @@ def unembed(embeds):
 def decode(tokens, skip_special_tokens=True):
     default_decoding = {x: c for x, c in enumerate(ascii_lowercase)}
     default_decoding[-1] = '' if skip_special_tokens else '<pass>' 
-    return ''.join([default_decoding[token.item()] for token in list(tokens)])
+    return ''.join([default_decoding[token.item()] for token in reversed(list(tokens))])
 
 def make_weights(alphabet_size: int, sequence_length: int):
     """Generates weights"""
