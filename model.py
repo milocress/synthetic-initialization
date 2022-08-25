@@ -45,8 +45,16 @@ def unembed(embeds):
 
     alphabet_size = embed_dim - sequence_len - 2
 
-    print(embeds[:,:,2:alphabet_size+2])
+    nominal_tokens = embeds[:,:,2:alphabet_size+2].argmax(dim=2)
+    mask = torch.logical_and((embeds[:,:,0] > 2), (embeds[:,:,1] == 2))
+    nominal_tokens[mask] = -1
+    return nominal_tokens
 
+
+def decode(tokens, skip_special_tokens=True):
+    default_decoding = {x: c for x, c in enumerate(ascii_lowercase)}
+    default_decoding[-1] = '' if skip_special_tokens else '<pass>' 
+    return ''.join([default_decoding[token.item()] for token in list(tokens)])
 
 def make_weights(alphabet_size: int, sequence_length: int):
     """Generates weights"""
