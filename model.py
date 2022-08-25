@@ -40,6 +40,13 @@ def embed(tokens, num_values=None):
 
     return torch.cat((one_hot, positional), dim=2)
 
+def unembed(embeds):
+    batch_size, sequence_len, embed_dim = embeds.shape
+
+    alphabet_size = embed_dim - sequence_len - 2
+
+    print(embeds[:,:,2:alphabet_size+2])
+
 
 def make_weights(alphabet_size: int, sequence_length: int):
     """Generates weights"""
@@ -110,8 +117,6 @@ class FeedForwardRelu(torch.nn.Module):
 class BasicTransformerBlock(torch.nn.Module):
     def __init__(self, alphabet_size: int, sequence_length: int) -> None:
         super().__init__()
-
-        embedding_length = alphabet_size + sequence_length + 2
 
         self.sa = BasicSelfAttention()
         self.ff = FeedForwardRelu(alphabet_size, sequence_length)
