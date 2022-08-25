@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from numpy.typing import NDArray
 from string import ascii_lowercase
+import torch.nn.functional as F
 
 default_tokens = {c: x for x, c in enumerate(ascii_lowercase)}
 
@@ -23,13 +24,13 @@ def batch_tokens(tokens: NDArray):
 
 
 def generate_position_embeddings(batch_size, sequence_length: int):
-    """ "one-hot position embeddings"""
+    """one-hot position embeddings"""
     M = np.eye(sequence_length)
     return torch.tensor(M).repeat(batch_size, 1, 1)
 
 
 def embed(tokens, num_values=None):
-    """ "Generates embeddings for a batch of tokens with an alphabet size of ``num_values``.
+    """Generates embeddings for a batch of tokens with an alphabet size of ``num_values``.
     Embeddings are one-hot on the alphabet and one-hot on positions"""
     batch_size, sequence_length = tokens.shape
     num_values = num_values + 2 if num_values is not None else np.max(tokens) + 1 + 2
@@ -94,9 +95,9 @@ class FeedForwardRelu(torch.nn.Module):
         in_dim, hidden_dim = embedding_length, embedding_length*4
         out_dim = in_dim
 
-        self.layer0 = torch.nn.Linear(in_dim, hidden_dim)
+        self.layer0 = torch.nn.Linear(in_dim, hidden_dim, False)
         self.relu   = torch.nn.ReLU()
-        self.layer1 = torch.nn.Linear(hidden_dim, out_dim)
+        self.layer1 = torch.nn.Linear(hidden_dim, out_dim, False)
 
         weight_tensor_0, weight_tensor_1 = make_weights(alphabet_size, sequence_length)
         self.layer0.weight = torch.nn.Parameter(weight_tensor_0)
@@ -113,11 +114,9 @@ class BasicTransformerBlock(torch.nn.Module):
         embedding_length = alphabet_size + sequence_length + 2
 
         self.sa = BasicSelfAttention()
-        self.ln = torch.nn.LayerNorm(embedding_length)
         self.ff = FeedForwardRelu(alphabet_size, sequence_length)
 
     def forward(self, X):
         X = self.sa(X)
         X = self.ff(X)
-        X = self.ln(X)
-
+        return X
