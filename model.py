@@ -75,8 +75,8 @@ def make_weights(alphabet_size: int, sequence_length: int):
     return weight_tensor, weight_tensor_2
 
 class BasicSelfAttention(torch.nn.Module):
-    def __init__(self, softmax_enabled: bool = False):
-        super.__init__()
+    def __init__(self, softmax_enabled: bool = False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.softmax_enabled = softmax_enabled
 
     def forward(self, X):
@@ -88,7 +88,7 @@ class BasicSelfAttention(torch.nn.Module):
 
 class FeedForwardRelu(torch.nn.Module):
     def __init__(self, alphabet_size: int, sequence_length: int):
-        super.__init__()
+        super().__init__()
 
         embedding_length = alphabet_size + sequence_length + 2
         in_dim, hidden_dim = embedding_length, embedding_length*4
@@ -99,8 +99,8 @@ class FeedForwardRelu(torch.nn.Module):
         self.layer1 = torch.nn.Linear(hidden_dim, out_dim)
 
         weight_tensor_0, weight_tensor_1 = make_weights(alphabet_size, sequence_length)
-        self.layer0.weight = weight_tensor_0
-        self.layer1.weight = weight_tensor_1
+        self.layer0.weight = torch.nn.Parameter(weight_tensor_0)
+        self.layer1.weight = torch.nn.Parameter(weight_tensor_1)
 
     def forward(self, X):
         return self.layer1(self.relu(self.layer0(X)))
