@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from numpy.typing import NDArray
+import torch.nn.functional as F
 from string import ascii_lowercase
 import torch.nn.functional as F
 
@@ -52,7 +53,7 @@ def make_weights(alphabet_size: int, sequence_length: int):
     helper_tensor = torch.cat((flag_tensor, helper_tensor, position_tensor), dim=1)
 
     helper_tensor_2 = torch.ones((sequence_length, sequence_length)) * -2
-    helper_tensor_2.fill_diagonal_(1.0)
+    helper_tensor_2.fill_diagonal_(5)
     helper_tensor_2.triu_(0)
     zero_tensors = torch.zeros((sequence_length, alphabet_size + 2))
     helper_tensor_2 = torch.cat((zero_tensors, helper_tensor_2), dim=1)
@@ -119,4 +120,8 @@ class BasicTransformerBlock(torch.nn.Module):
     def forward(self, X):
         X = self.sa(X)
         X = self.ff(X)
+<<<<<<< Updated upstream:model.py
         return X
+=======
+        X = self.ln(X)
+>>>>>>> Stashed changes:models/model.py
