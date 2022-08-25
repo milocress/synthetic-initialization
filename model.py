@@ -105,3 +105,19 @@ class FeedForwardRelu(torch.nn.Module):
     def forward(self, X):
         return self.layer1(self.relu(self.layer0(X)))
 
+
+class BasicTransformerBlock(torch.nn.Module):
+    def __init__(self, alphabet_size: int, sequence_length: int) -> None:
+        super().__init__()
+
+        embedding_length = alphabet_size + sequence_length + 2
+
+        self.sa = BasicSelfAttention()
+        self.ln = torch.nn.LayerNorm(embedding_length)
+        self.ff = FeedForwardRelu(alphabet_size, sequence_length)
+
+    def forward(self, X):
+        X = self.sa(X)
+        X = self.ff(X)
+        X = self.ln(X)
+
